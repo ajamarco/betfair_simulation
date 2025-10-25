@@ -22,15 +22,35 @@ export default function Home() {
   const [layBetDetails, setLayBetDetails] = useState<BetDetails>({});
 
   const toggleBackBet = (score: string) => {
-    setShowBackBetComponent((prev) =>
-      prev.includes(score) ? prev.filter((s) => s !== score) : [...prev, score]
-    );
+    setShowBackBetComponent((prev) => {
+      if (prev.includes(score)) {
+        // If removing the score, also clear its bet details
+        setBackBetDetails((details) => {
+          const newDetails = { ...details };
+          delete newDetails[score];
+          return newDetails;
+        });
+        return prev.filter((s) => s !== score);
+      } else {
+        return [...prev, score];
+      }
+    });
   };
 
   const toggleLayBet = (score: string) => {
-    setShowLayBetComponent((prev) =>
-      prev.includes(score) ? prev.filter((s) => s !== score) : [...prev, score]
-    );
+    setShowLayBetComponent((prev) => {
+      if (prev.includes(score)) {
+        // If removing the score, also clear its bet details
+        setLayBetDetails((details) => {
+          const newDetails = { ...details };
+          delete newDetails[score];
+          return newDetails;
+        });
+        return prev.filter((s) => s !== score);
+      } else {
+        return [...prev, score];
+      }
+    });
   };
 
   const updateBackBetDetails = (score: string, odds: number, stake: number) => {
@@ -45,6 +65,16 @@ export default function Home() {
       ...prev,
       [score]: { odds, stake },
     }));
+  };
+
+  const clearBackBets = () => {
+    setShowBackBetComponent([]);
+    setBackBetDetails({});
+  };
+
+  const clearLayBets = () => {
+    setShowLayBetComponent([]);
+    setLayBetDetails({});
   };
 
   // Calculate profits for back and lay bets
@@ -120,6 +150,7 @@ export default function Home() {
             betType="Back"
             activeScores={showBackBetComponent}
             updateBetDetails={updateBackBetDetails}
+            onClear={clearBackBets}
           />
         )}
         {showLayBetComponent.length > 0 && (
@@ -127,6 +158,7 @@ export default function Home() {
             betType="Lay"
             activeScores={showLayBetComponent}
             updateBetDetails={updateLayBetDetails}
+            onClear={clearLayBets}
           />
         )}
       </div>

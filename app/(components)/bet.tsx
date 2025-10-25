@@ -7,9 +7,15 @@ interface BetProps {
   betType: "Back" | "Lay";
   activeScores: string[];
   updateBetDetails: (score: string, odds: number, stake: number) => void;
+  onClear: () => void;
 }
 
-const Bet = ({ betType, activeScores, updateBetDetails }: BetProps) => {
+const Bet = ({
+  betType,
+  activeScores,
+  updateBetDetails,
+  onClear,
+}: BetProps) => {
   return (
     <div
       className={`p-4 border rounded shadow-md m-4 ${
@@ -26,6 +32,9 @@ const Bet = ({ betType, activeScores, updateBetDetails }: BetProps) => {
         />
       ))}
       <button>Place Bet</button>
+      <button onClick={onClear} className="ml-2">
+        Clear All
+      </button>
     </div>
   );
 };
