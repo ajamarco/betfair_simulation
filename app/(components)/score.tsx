@@ -16,12 +16,30 @@ const Score = ({
   setShowBackBetComponent,
   setShowLayBetComponent,
 }: ScoreProps) => {
+  const profitColor = profit >= 0 ? "text-green-600" : "text-red-600";
+
   return (
-    <div>
-      <div>{value}</div>
-      <div>{profit}</div>
-      <BackLayButton text="Back" onClick={setShowBackBetComponent} />
-      <BackLayButton text="Lay" onClick={setShowLayBetComponent} />
+    <div className="flex items-center justify-between w-full gap-4 p-2 border-b">
+      <div className="font-semibold w-32">{value}</div>
+      <div className={`flex-1 ${profitColor}`}>
+        &gt;&gt; ${profit.toFixed(2)}
+      </div>
+      <div className="flex gap-2">
+        <button
+          onClick={setShowBackBetComponent}
+          className="px-3 py-1 border border-gray-400 rounded"
+          style={{ backgroundColor: "#A6D8FF" }}
+        >
+          Back
+        </button>
+        <button
+          onClick={setShowLayBetComponent}
+          className="px-3 py-1 border border-gray-400 rounded"
+          style={{ backgroundColor: "#FAC9D4" }}
+        >
+          Lay
+        </button>
+      </div>
     </div>
   );
 };

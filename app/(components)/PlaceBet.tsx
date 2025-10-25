@@ -25,21 +25,23 @@ const PlaceBet = ({
   };
 
   return (
-    <div>
-      <span className="m-2">{score}</span>
+    <div className="flex items-center gap-3 p-3 mb-2 border border-gray-300 rounded-lg bg-white">
+      <span className="font-semibold w-32">{score}</span>
       <input
         type="number"
         placeholder="Odds"
         step="0.01"
         value={odds || ""}
         onChange={handleOddsChange}
+        className="w-24 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
       />
       <input
         type="number"
-        placeholder="Stake Amount"
+        placeholder="Stake"
         step="0.1"
         value={stake || ""}
         onChange={handleStakeChange}
+        className="w-24 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
       />
     </div>
   );
