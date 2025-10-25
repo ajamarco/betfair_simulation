@@ -161,6 +161,12 @@ export default function Home() {
             onClear={clearLayBets}
           />
         )}
+        {(showBackBetComponent.length > 0 ||
+          showLayBetComponent.length > 0) && (
+          <button className="m-4 p-2 border rounded shadow-md">
+            Place Bets
+          </button>
+        )}
       </div>
     </div>
   );

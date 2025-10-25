@@ -31,7 +31,6 @@ const Bet = ({
           updateBetDetails={updateBetDetails}
         />
       ))}
-      <button>Place Bet</button>
       <button onClick={onClear} className="ml-2">
         Clear All
       </button>
