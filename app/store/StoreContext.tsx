@@ -3,6 +3,12 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { SCORE_VALUES } from "../(consts)";
 
+interface PlacedBet {
+  score: string;
+  odds: number;
+  amount: number;
+}
+
 // 2️⃣ Define what actions your store exposes
 // Updated to expose individual states as tuples
 interface AppContextType {
@@ -37,6 +43,14 @@ interface AppContextType {
       >
     >
   ];
+  placedBackBets: [
+    PlacedBet[],
+    React.Dispatch<React.SetStateAction<PlacedBet[]>>
+  ];
+  placedLayBets: [
+    PlacedBet[],
+    React.Dispatch<React.SetStateAction<PlacedBet[]>>
+  ];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -54,9 +68,20 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   }, {} as Record<string, { profit: number; backBetActive: boolean; layBetActive: boolean }>);
 
   const score = useState(initialScores);
+  const placedBackBets = useState<PlacedBet[]>([]);
+  const placedLayBets = useState<PlacedBet[]>([]);
 
   return (
-    <AppContext.Provider value={{ user, theme, activeBetButton, score }}>
+    <AppContext.Provider
+      value={{
+        user,
+        theme,
+        activeBetButton,
+        score,
+        placedBackBets,
+        placedLayBets,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

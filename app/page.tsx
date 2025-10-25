@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Score from "./(components)/score";
 import { SCORE_VALUES } from "./(consts)";
 import Bet from "./(components)/bet";
+import PlacedBets from "./(components)/PlacedBets";
 import { useStore } from "./store/StoreContext";
 
 interface BetDetails {
@@ -77,9 +78,64 @@ export default function Home() {
     setLayBetDetails({});
   };
 
+  const resetPlacedBets = () => {
+    const [, setPlacedBack] = store.placedBackBets;
+    const [, setPlacedLay] = store.placedLayBets;
+    setPlacedBack([]);
+    setPlacedLay([]);
+    // Also clear any active bet details to reset profits
+    setBackBetDetails({});
+    setLayBetDetails({});
+  };
+
+  const handlePlaceBet = () => {
+    const [placedBack, setPlacedBack] = store.placedBackBets;
+    const [placedLay, setPlacedLay] = store.placedLayBets;
+
+    // Store back bets
+    const newBackBets = showBackBetComponent
+      .map((score) => {
+        const bet = backBetDetails[score];
+        if (bet && bet.odds > 0 && bet.stake > 0) {
+          return {
+            score,
+            odds: bet.odds,
+            amount: bet.stake,
+          };
+        }
+        return null;
+      })
+      .filter((bet) => bet !== null);
+
+    // Store lay bets
+    const newLayBets = showLayBetComponent
+      .map((score) => {
+        const bet = layBetDetails[score];
+        if (bet && bet.odds > 0 && bet.stake > 0) {
+          return {
+            score,
+            odds: bet.odds,
+            amount: bet.stake,
+          };
+        }
+        return null;
+      })
+      .filter((bet) => bet !== null);
+
+    // Add new bets to placed bets
+    setPlacedBack([...placedBack, ...newBackBets]);
+    setPlacedLay([...placedLay, ...newLayBets]);
+
+    // Clear active bets UI (but keep bet details for profit calculation)
+    setShowBackBetComponent([]);
+    setShowLayBetComponent([]);
+  };
+
   // Calculate profits for back and lay bets
   useEffect(() => {
     const [scores, setScores] = store.score;
+    const [placedBack] = store.placedBackBets;
+    const [placedLay] = store.placedLayBets;
     const newScores = { ...scores };
 
     // Reset all profits to 0
@@ -87,7 +143,20 @@ export default function Home() {
       newScores[key] = { ...newScores[key], profit: 0 };
     });
 
-    // Calculate profits from back bets
+    // Calculate profits from placed back bets
+    placedBack.forEach((placedBet) => {
+      const winProfit = placedBet.odds * placedBet.amount - placedBet.amount;
+
+      Object.keys(newScores).forEach((scoreKey) => {
+        if (scoreKey === placedBet.score) {
+          newScores[scoreKey].profit += winProfit;
+        } else {
+          newScores[scoreKey].profit -= placedBet.amount;
+        }
+      });
+    });
+
+    // Calculate profits from active back bets (not yet placed)
     showBackBetComponent.forEach((activeScore) => {
       const bet = backBetDetails[activeScore];
       if (bet && bet.odds > 0 && bet.stake > 0) {
@@ -104,7 +173,20 @@ export default function Home() {
       }
     });
 
-    // Calculate profits from lay bets
+    // Calculate profits from placed lay bets
+    placedLay.forEach((placedBet) => {
+      const liability = (placedBet.odds - 1) * placedBet.amount;
+
+      Object.keys(newScores).forEach((scoreKey) => {
+        if (scoreKey === placedBet.score) {
+          newScores[scoreKey].profit -= liability;
+        } else {
+          newScores[scoreKey].profit += placedBet.amount;
+        }
+      });
+    });
+
+    // Calculate profits from active lay bets (not yet placed)
     showLayBetComponent.forEach((activeScore) => {
       const bet = layBetDetails[activeScore];
       if (bet && bet.odds > 0 && bet.stake > 0) {
@@ -129,6 +211,8 @@ export default function Home() {
     showBackBetComponent,
     layBetDetails,
     showLayBetComponent,
+    store.placedBackBets,
+    store.placedLayBets,
   ]);
 
   return (
@@ -163,9 +247,20 @@ export default function Home() {
         )}
         {(showBackBetComponent.length > 0 ||
           showLayBetComponent.length > 0) && (
-          <button className="m-4 p-2 border rounded shadow-md">
+          <button
+            onClick={handlePlaceBet}
+            className="m-4 p-2 border rounded shadow-md"
+          >
             Place Bets
           </button>
+        )}
+        {(store.placedBackBets[0].length > 0 ||
+          store.placedLayBets[0].length > 0) && (
+          <PlacedBets
+            placedBackBets={store.placedBackBets[0]}
+            placedLayBets={store.placedLayBets[0]}
+            onReset={resetPlacedBets}
+          />
         )}
       </div>
     </div>
