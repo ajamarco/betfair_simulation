@@ -1,12 +1,14 @@
 "use client";
 
 import { useStore } from "../store/StoreContext";
+import PlaceBet from "./PlaceBet";
 
 interface BetProps {
   betType: "Back" | "Lay";
+  activeScores: string[];
 }
 
-const Bet = ({ betType }: BetProps) => {
+const Bet = ({ betType, activeScores }: BetProps) => {
   const store = useStore();
   return (
     <div
@@ -15,9 +17,9 @@ const Bet = ({ betType }: BetProps) => {
       }`}
     >
       <p>Placing {betType} bet</p>
-      {/*TODO: add an input for all the active back / lay bets */}
-      {/* <input type="number" placeholder="Stake Amount" />
-       */}
+      {activeScores.map((score) => (
+        <PlaceBet key={score} score={score} betType={betType} />
+      ))}
       <button>Place Bet</button>
     </div>
   );

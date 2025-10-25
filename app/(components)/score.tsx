@@ -6,8 +6,8 @@ import BackLayButton from "./backLayButton";
 interface ScoreProps {
   value: string; // Correctly restricts value to strings in SCORE_VALUES
   profit: number;
-  setShowBackBetComponent: React.Dispatch<React.SetStateAction<boolean>>;
-  setShowLayBetComponent: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowBackBetComponent: () => void;
+  setShowLayBetComponent: () => void;
 }
 
 const Score = ({
@@ -20,11 +20,8 @@ const Score = ({
     <div>
       <div>{value}</div>
       <div>{profit}</div>
-      <BackLayButton
-        text="Back"
-        onClick={() => setShowBackBetComponent(true)}
-      />
-      <BackLayButton text="Lay" onClick={() => setShowLayBetComponent(true)} />
+      <BackLayButton text="Back" onClick={setShowBackBetComponent} />
+      <BackLayButton text="Lay" onClick={setShowLayBetComponent} />
     </div>
   );
 };
