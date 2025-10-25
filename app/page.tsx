@@ -47,7 +47,7 @@ export default function Home() {
     }));
   };
 
-  // Calculate profits for back bets
+  // Calculate profits for back and lay bets
   useEffect(() => {
     const [scores, setScores] = store.score;
     const newScores = { ...scores };
@@ -74,8 +74,32 @@ export default function Home() {
       }
     });
 
+    // Calculate profits from lay bets
+    showLayBetComponent.forEach((activeScore) => {
+      const bet = layBetDetails[activeScore];
+      if (bet && bet.odds > 0 && bet.stake > 0) {
+        // Liability = (odds - 1) * stake
+        const liability = (bet.odds - 1) * bet.stake;
+
+        Object.keys(newScores).forEach((scoreKey) => {
+          if (scoreKey === activeScore) {
+            // For the laid score: lose the liability
+            newScores[scoreKey].profit -= liability;
+          } else {
+            // For all other scores: win the stake
+            newScores[scoreKey].profit += bet.stake;
+          }
+        });
+      }
+    });
+
     setScores(newScores);
-  }, [backBetDetails, showBackBetComponent]);
+  }, [
+    backBetDetails,
+    showBackBetComponent,
+    layBetDetails,
+    showLayBetComponent,
+  ]);
 
   return (
     <div className="flex min-h-screen items-start justify-center bg-zinc-50 font-sans dark:bg-black">

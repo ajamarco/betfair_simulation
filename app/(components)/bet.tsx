@@ -10,7 +10,6 @@ interface BetProps {
 }
 
 const Bet = ({ betType, activeScores, updateBetDetails }: BetProps) => {
-  const store = useStore();
   return (
     <div
       className={`p-4 border rounded shadow-md m-4 ${
