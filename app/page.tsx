@@ -1,9 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Score from "./(components)/score";
 import { SCORE_VALUES } from "./(consts)";
 import Bet from "./(components)/bet";
 import { useStore } from "./store/StoreContext";
+
+interface BetDetails {
+  [score: string]: {
+    odds: number;
+    stake: number;
+  };
+}
 
 export default function Home() {
   const store = useStore();
@@ -11,6 +18,8 @@ export default function Home() {
     []
   );
   const [showLayBetComponent, setShowLayBetComponent] = useState<string[]>([]);
+  const [backBetDetails, setBackBetDetails] = useState<BetDetails>({});
+  const [layBetDetails, setLayBetDetails] = useState<BetDetails>({});
 
   const toggleBackBet = (score: string) => {
     setShowBackBetComponent((prev) =>
@@ -23,6 +32,50 @@ export default function Home() {
       prev.includes(score) ? prev.filter((s) => s !== score) : [...prev, score]
     );
   };
+
+  const updateBackBetDetails = (score: string, odds: number, stake: number) => {
+    setBackBetDetails((prev) => ({
+      ...prev,
+      [score]: { odds, stake },
+    }));
+  };
+
+  const updateLayBetDetails = (score: string, odds: number, stake: number) => {
+    setLayBetDetails((prev) => ({
+      ...prev,
+      [score]: { odds, stake },
+    }));
+  };
+
+  // Calculate profits for back bets
+  useEffect(() => {
+    const [scores, setScores] = store.score;
+    const newScores = { ...scores };
+
+    // Reset all profits to 0
+    Object.keys(newScores).forEach((key) => {
+      newScores[key] = { ...newScores[key], profit: 0 };
+    });
+
+    // Calculate profits from back bets
+    showBackBetComponent.forEach((activeScore) => {
+      const bet = backBetDetails[activeScore];
+      if (bet && bet.odds > 0 && bet.stake > 0) {
+        // For the winning score: profit = (odds * stake) - stake
+        const winProfit = bet.odds * bet.stake - bet.stake;
+
+        Object.keys(newScores).forEach((scoreKey) => {
+          if (scoreKey === activeScore) {
+            newScores[scoreKey].profit += winProfit;
+          } else {
+            newScores[scoreKey].profit -= bet.stake;
+          }
+        });
+      }
+    });
+
+    setScores(newScores);
+  }, [backBetDetails, showBackBetComponent]);
 
   return (
     <div className="flex min-h-screen items-start justify-center bg-zinc-50 font-sans dark:bg-black">
@@ -39,10 +92,18 @@ export default function Home() {
       </main>
       <div className="flex min-h-screen flex-col">
         {showBackBetComponent.length > 0 && (
-          <Bet betType="Back" activeScores={showBackBetComponent} />
+          <Bet
+            betType="Back"
+            activeScores={showBackBetComponent}
+            updateBetDetails={updateBackBetDetails}
+          />
         )}
         {showLayBetComponent.length > 0 && (
-          <Bet betType="Lay" activeScores={showLayBetComponent} />
+          <Bet
+            betType="Lay"
+            activeScores={showLayBetComponent}
+            updateBetDetails={updateLayBetDetails}
+          />
         )}
       </div>
     </div>

@@ -6,9 +6,10 @@ import PlaceBet from "./PlaceBet";
 interface BetProps {
   betType: "Back" | "Lay";
   activeScores: string[];
+  updateBetDetails: (score: string, odds: number, stake: number) => void;
 }
 
-const Bet = ({ betType, activeScores }: BetProps) => {
+const Bet = ({ betType, activeScores, updateBetDetails }: BetProps) => {
   const store = useStore();
   return (
     <div
@@ -18,7 +19,12 @@ const Bet = ({ betType, activeScores }: BetProps) => {
     >
       <p>Placing {betType} bet</p>
       {activeScores.map((score) => (
-        <PlaceBet key={score} score={score} betType={betType} />
+        <PlaceBet
+          key={score}
+          score={score}
+          betType={betType}
+          updateBetDetails={updateBetDetails}
+        />
       ))}
       <button>Place Bet</button>
     </div>

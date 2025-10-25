@@ -1,6 +1,7 @@
 // store/StoreContext.tsx
 "use client";
 import React, { createContext, useContext, useState, ReactNode } from "react";
+import { SCORE_VALUES } from "../(consts)";
 
 // 2️⃣ Define what actions your store exposes
 // Updated to expose individual states as tuples
@@ -45,20 +46,14 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const user = useState<string | null>("Alex");
   const theme = useState<"light" | "dark">("light");
   const activeBetButton = useState<string | undefined>(undefined);
-  const score = useState<
-    Record<
-      string,
-      {
-        profit: number;
-        backBetActive: boolean;
-        layBetActive: boolean;
-      }
-    >
-  >({
-    "0-0": { profit: 0, backBetActive: false, layBetActive: false },
-    "0-1": { profit: 0, backBetActive: false, layBetActive: false },
-    "1-0": { profit: 0, backBetActive: false, layBetActive: false },
-  });
+
+  // Initialize all scores from SCORE_VALUES
+  const initialScores = SCORE_VALUES.reduce((acc, scoreValue) => {
+    acc[scoreValue] = { profit: 0, backBetActive: false, layBetActive: false };
+    return acc;
+  }, {} as Record<string, { profit: number; backBetActive: boolean; layBetActive: boolean }>);
+
+  const score = useState(initialScores);
 
   return (
     <AppContext.Provider value={{ user, theme, activeBetButton, score }}>
