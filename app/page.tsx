@@ -235,6 +235,7 @@ export default function Home() {
             activeScores={showBackBetComponent}
             updateBetDetails={updateBackBetDetails}
             onClear={clearBackBets}
+            onRemoveScore={toggleBackBet}
           />
         )}
         {showLayBetComponent.length > 0 && (
@@ -243,6 +244,7 @@ export default function Home() {
             activeScores={showLayBetComponent}
             updateBetDetails={updateLayBetDetails}
             onClear={clearLayBets}
+            onRemoveScore={toggleLayBet}
           />
         )}
         {(showBackBetComponent.length > 0 ||

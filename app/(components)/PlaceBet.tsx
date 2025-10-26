@@ -4,10 +4,12 @@ const PlaceBet = ({
   score,
   betType,
   updateBetDetails,
+  onRemove,
 }: {
   score: string;
   betType: "Back" | "Lay";
   updateBetDetails: (score: string, odds: number, stake: number) => void;
+  onRemove: (score: string) => void;
 }) => {
   const [odds, setOdds] = useState<number>(0);
   const [stake, setStake] = useState<number>(0);
@@ -43,6 +45,12 @@ const PlaceBet = ({
         onChange={handleStakeChange}
         className="w-24 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
       />
+      <button
+        onClick={() => onRemove(score)}
+        className="ml-auto px-2 py-1 text-red-600 font-bold border border-red-600 rounded hover:bg-red-50"
+      >
+        X
+      </button>
     </div>
   );
 };

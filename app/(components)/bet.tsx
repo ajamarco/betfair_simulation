@@ -8,6 +8,7 @@ interface BetProps {
   activeScores: string[];
   updateBetDetails: (score: string, odds: number, stake: number) => void;
   onClear: () => void;
+  onRemoveScore: (score: string) => void;
 }
 
 const Bet = ({
@@ -15,6 +16,7 @@ const Bet = ({
   activeScores,
   updateBetDetails,
   onClear,
+  onRemoveScore,
 }: BetProps) => {
   return (
     <div
@@ -29,6 +31,7 @@ const Bet = ({
           score={score}
           betType={betType}
           updateBetDetails={updateBetDetails}
+          onRemove={onRemoveScore}
         />
       ))}
       <button onClick={onClear} className="ml-2">
