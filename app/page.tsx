@@ -1,17 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import Score from "./(components)/score";
-import { SCORE_VALUES } from "./(consts)";
+import { SCORE_VALUES, ActiveBet } from "./(consts)";
 import Bet from "./(components)/bet";
 import PlacedBets from "./(components)/PlacedBets";
 import { useStore } from "./store/StoreContext";
-
-interface ActiveBet {
-  id: string;
-  score: string;
-  odds: number;
-  stake: number;
-}
 
 export default function Home() {
   const store = useStore();

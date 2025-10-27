@@ -1,13 +1,7 @@
 "use client";
 
 import PlaceBet from "./PlaceBet";
-
-interface ActiveBet {
-  id: string;
-  score: string;
-  odds: number;
-  stake: number;
-}
+import { ActiveBet } from "../(consts)";
 
 interface BetProps {
   betType: "Back" | "Lay";

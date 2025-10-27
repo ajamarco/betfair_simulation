@@ -1,3 +1,10 @@
+export interface ActiveBet {
+  id: string;
+  score: string;
+  odds: number;
+  stake: number;
+}
+
 export const SCORE_VALUES = [
   "0-0",
   "0-1",
