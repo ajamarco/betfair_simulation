@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 
 const PlaceBet = ({
+  id,
   score,
   betType,
   updateBetDetails,
   onRemove,
 }: {
+  id: string;
   score: string;
   betType: "Back" | "Lay";
-  updateBetDetails: (score: string, odds: number, stake: number) => void;
-  onRemove: (score: string) => void;
+  updateBetDetails: (id: string, odds: number, stake: number) => void;
+  onRemove: (id: string) => void;
 }) => {
   const [odds, setOdds] = useState<number>(0);
   const [stake, setStake] = useState<number>(0);
@@ -17,13 +19,13 @@ const PlaceBet = ({
   const handleOddsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setOdds(value);
-    updateBetDetails(score, value, stake);
+    updateBetDetails(id, value, stake);
   };
 
   const handleStakeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setStake(value);
-    updateBetDetails(score, odds, value);
+    updateBetDetails(id, odds, value);
   };
 
   return (
@@ -46,7 +48,7 @@ const PlaceBet = ({
         className="w-24 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
       />
       <button
-        onClick={() => onRemove(score)}
+        onClick={() => onRemove(id)}
         className="ml-auto px-2 py-1 text-red-600 font-bold border border-red-600 rounded hover:bg-red-50"
       >
         X

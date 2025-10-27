@@ -1,22 +1,28 @@
 "use client";
 
-import { useStore } from "../store/StoreContext";
 import PlaceBet from "./PlaceBet";
+
+interface ActiveBet {
+  id: string;
+  score: string;
+  odds: number;
+  stake: number;
+}
 
 interface BetProps {
   betType: "Back" | "Lay";
-  activeScores: string[];
-  updateBetDetails: (score: string, odds: number, stake: number) => void;
+  activeBets: ActiveBet[];
+  updateBetDetails: (id: string, odds: number, stake: number) => void;
   onClear: () => void;
-  onRemoveScore: (score: string) => void;
+  onRemoveBet: (id: string) => void;
 }
 
 const Bet = ({
   betType,
-  activeScores,
+  activeBets,
   updateBetDetails,
   onClear,
-  onRemoveScore,
+  onRemoveBet,
 }: BetProps) => {
   return (
     <div
@@ -25,13 +31,14 @@ const Bet = ({
       }`}
     >
       <p>Placing {betType} bet</p>
-      {activeScores.map((score) => (
+      {activeBets.map((bet) => (
         <PlaceBet
-          key={score}
-          score={score}
+          key={bet.id}
+          id={bet.id}
+          score={bet.score}
           betType={betType}
           updateBetDetails={updateBetDetails}
-          onRemove={onRemoveScore}
+          onRemove={onRemoveBet}
         />
       ))}
       <button onClick={onClear} className="ml-2">
