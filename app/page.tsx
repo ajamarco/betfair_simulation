@@ -6,76 +6,64 @@ import Bet from "./(components)/bet";
 import PlacedBets from "./(components)/PlacedBets";
 import { useStore } from "./store/StoreContext";
 
-interface BetDetails {
-  [score: string]: {
-    odds: number;
-    stake: number;
-  };
+interface ActiveBet {
+  id: string;
+  score: string;
+  odds: number;
+  stake: number;
 }
 
 export default function Home() {
   const store = useStore();
-  const [showBackBetComponent, setShowBackBetComponent] = useState<string[]>(
-    []
-  );
-  const [showLayBetComponent, setShowLayBetComponent] = useState<string[]>([]);
-  const [backBetDetails, setBackBetDetails] = useState<BetDetails>({});
-  const [layBetDetails, setLayBetDetails] = useState<BetDetails>({});
+  const [activeBackBets, setActiveBackBets] = useState<ActiveBet[]>([]);
+  const [activeLayBets, setActiveLayBets] = useState<ActiveBet[]>([]);
 
-  const toggleBackBet = (score: string) => {
-    setShowBackBetComponent((prev) => {
-      if (prev.includes(score)) {
-        // If removing the score, also clear its bet details
-        setBackBetDetails((details) => {
-          const newDetails = { ...details };
-          delete newDetails[score];
-          return newDetails;
-        });
-        return prev.filter((s) => s !== score);
-      } else {
-        return [...prev, score];
-      }
-    });
+  const addBackBet = (score: string) => {
+    const newBet: ActiveBet = {
+      id: `back-${Date.now()}-${Math.random()}`,
+      score,
+      odds: 0,
+      stake: 0,
+    };
+    setActiveBackBets((prev) => [...prev, newBet]);
   };
 
-  const toggleLayBet = (score: string) => {
-    setShowLayBetComponent((prev) => {
-      if (prev.includes(score)) {
-        // If removing the score, also clear its bet details
-        setLayBetDetails((details) => {
-          const newDetails = { ...details };
-          delete newDetails[score];
-          return newDetails;
-        });
-        return prev.filter((s) => s !== score);
-      } else {
-        return [...prev, score];
-      }
-    });
+  const addLayBet = (score: string) => {
+    const newBet: ActiveBet = {
+      id: `lay-${Date.now()}-${Math.random()}`,
+      score,
+      odds: 0,
+      stake: 0,
+    };
+    setActiveLayBets((prev) => [...prev, newBet]);
   };
 
-  const updateBackBetDetails = (score: string, odds: number, stake: number) => {
-    setBackBetDetails((prev) => ({
-      ...prev,
-      [score]: { odds, stake },
-    }));
+  const removeBackBet = (id: string) => {
+    setActiveBackBets((prev) => prev.filter((bet) => bet.id !== id));
   };
 
-  const updateLayBetDetails = (score: string, odds: number, stake: number) => {
-    setLayBetDetails((prev) => ({
-      ...prev,
-      [score]: { odds, stake },
-    }));
+  const removeLayBet = (id: string) => {
+    setActiveLayBets((prev) => prev.filter((bet) => bet.id !== id));
+  };
+
+  const updateBackBetDetails = (id: string, odds: number, stake: number) => {
+    setActiveBackBets((prev) =>
+      prev.map((bet) => (bet.id === id ? { ...bet, odds, stake } : bet))
+    );
+  };
+
+  const updateLayBetDetails = (id: string, odds: number, stake: number) => {
+    setActiveLayBets((prev) =>
+      prev.map((bet) => (bet.id === id ? { ...bet, odds, stake } : bet))
+    );
   };
 
   const clearBackBets = () => {
-    setShowBackBetComponent([]);
-    setBackBetDetails({});
+    setActiveBackBets([]);
   };
 
   const clearLayBets = () => {
-    setShowLayBetComponent([]);
-    setLayBetDetails({});
+    setActiveLayBets([]);
   };
 
   const resetPlacedBets = () => {
@@ -83,9 +71,6 @@ export default function Home() {
     const [, setPlacedLay] = store.placedLayBets;
     setPlacedBack([]);
     setPlacedLay([]);
-    // Also clear any active bet details to reset profits
-    setBackBetDetails({});
-    setLayBetDetails({});
   };
 
   const handlePlaceBet = () => {
@@ -93,42 +78,30 @@ export default function Home() {
     const [placedLay, setPlacedLay] = store.placedLayBets;
 
     // Store back bets
-    const newBackBets = showBackBetComponent
-      .map((score) => {
-        const bet = backBetDetails[score];
-        if (bet && bet.odds > 0 && bet.stake > 0) {
-          return {
-            score,
-            odds: bet.odds,
-            amount: bet.stake,
-          };
-        }
-        return null;
-      })
-      .filter((bet) => bet !== null);
+    const newBackBets = activeBackBets
+      .filter((bet) => bet.odds > 0 && bet.stake > 0)
+      .map((bet) => ({
+        score: bet.score,
+        odds: bet.odds,
+        amount: bet.stake,
+      }));
 
     // Store lay bets
-    const newLayBets = showLayBetComponent
-      .map((score) => {
-        const bet = layBetDetails[score];
-        if (bet && bet.odds > 0 && bet.stake > 0) {
-          return {
-            score,
-            odds: bet.odds,
-            amount: bet.stake,
-          };
-        }
-        return null;
-      })
-      .filter((bet) => bet !== null);
+    const newLayBets = activeLayBets
+      .filter((bet) => bet.odds > 0 && bet.stake > 0)
+      .map((bet) => ({
+        score: bet.score,
+        odds: bet.odds,
+        amount: bet.stake,
+      }));
 
     // Add new bets to placed bets
     setPlacedBack([...placedBack, ...newBackBets]);
     setPlacedLay([...placedLay, ...newLayBets]);
 
-    // Clear active bets UI (but keep bet details for profit calculation)
-    setShowBackBetComponent([]);
-    setShowLayBetComponent([]);
+    // Clear active bets UI
+    setActiveBackBets([]);
+    setActiveLayBets([]);
   };
 
   // Calculate profits for back and lay bets
@@ -157,17 +130,15 @@ export default function Home() {
     });
 
     // Calculate profits from active back bets (not yet placed)
-    showBackBetComponent.forEach((activeScore) => {
-      const bet = backBetDetails[activeScore];
-      if (bet && bet.odds > 0 && bet.stake > 0) {
-        // For the winning score: profit = (odds * stake) - stake
-        const winProfit = bet.odds * bet.stake - bet.stake;
+    activeBackBets.forEach((activeBet) => {
+      if (activeBet.odds > 0 && activeBet.stake > 0) {
+        const winProfit = activeBet.odds * activeBet.stake - activeBet.stake;
 
         Object.keys(newScores).forEach((scoreKey) => {
-          if (scoreKey === activeScore) {
+          if (scoreKey === activeBet.score) {
             newScores[scoreKey].profit += winProfit;
           } else {
-            newScores[scoreKey].profit -= bet.stake;
+            newScores[scoreKey].profit -= activeBet.stake;
           }
         });
       }
@@ -187,83 +158,82 @@ export default function Home() {
     });
 
     // Calculate profits from active lay bets (not yet placed)
-    showLayBetComponent.forEach((activeScore) => {
-      const bet = layBetDetails[activeScore];
-      if (bet && bet.odds > 0 && bet.stake > 0) {
-        // Liability = (odds - 1) * stake
-        const liability = (bet.odds - 1) * bet.stake;
+    activeLayBets.forEach((activeBet) => {
+      if (activeBet.odds > 0 && activeBet.stake > 0) {
+        const liability = (activeBet.odds - 1) * activeBet.stake;
 
         Object.keys(newScores).forEach((scoreKey) => {
-          if (scoreKey === activeScore) {
-            // For the laid score: lose the liability
+          if (scoreKey === activeBet.score) {
             newScores[scoreKey].profit -= liability;
           } else {
-            // For all other scores: win the stake
-            newScores[scoreKey].profit += bet.stake;
+            newScores[scoreKey].profit += activeBet.stake;
           }
         });
       }
     });
 
     setScores(newScores);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    backBetDetails,
-    showBackBetComponent,
-    layBetDetails,
-    showLayBetComponent,
-    store.placedBackBets,
-    store.placedLayBets,
+    activeBackBets,
+    activeLayBets,
+    store.placedBackBets[0],
+    store.placedLayBets[0],
   ]);
 
   return (
-    <div className="flex min-h-screen items-start justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col px-16 py-8 bg-white dark:bg-black">
-        {Object.entries(store.score[0]).map(([scoreKey, scoreData]) => (
-          <Score
-            key={scoreKey}
-            value={scoreKey}
-            profit={scoreData.profit}
-            setShowBackBetComponent={() => toggleBackBet(scoreKey)}
-            setShowLayBetComponent={() => toggleLayBet(scoreKey)}
-          />
-        ))}
-      </main>
-      <div className="flex min-h-screen flex-col">
-        {showBackBetComponent.length > 0 && (
-          <Bet
-            betType="Back"
-            activeScores={showBackBetComponent}
-            updateBetDetails={updateBackBetDetails}
-            onClear={clearBackBets}
-            onRemoveScore={toggleBackBet}
-          />
-        )}
-        {showLayBetComponent.length > 0 && (
-          <Bet
-            betType="Lay"
-            activeScores={showLayBetComponent}
-            updateBetDetails={updateLayBetDetails}
-            onClear={clearLayBets}
-            onRemoveScore={toggleLayBet}
-          />
-        )}
-        {(showBackBetComponent.length > 0 ||
-          showLayBetComponent.length > 0) && (
-          <button
-            onClick={handlePlaceBet}
-            className="m-4 p-2 border rounded shadow-md"
-          >
-            Place Bets
-          </button>
-        )}
-        {(store.placedBackBets[0].length > 0 ||
-          store.placedLayBets[0].length > 0) && (
-          <PlacedBets
-            placedBackBets={store.placedBackBets[0]}
-            placedLayBets={store.placedLayBets[0]}
-            onReset={resetPlacedBets}
-          />
-        )}
+    <div className="flex h-screen bg-zinc-50 font-sans dark:bg-black p-4">
+      <div className="flex w-full max-w-7xl mx-auto gap-4 h-full">
+        {/* Left Column - Scores */}
+        <div className="w-2/3 flex flex-col bg-white dark:bg-black p-4 overflow-y-auto h-full">
+          {Object.entries(store.score[0]).map(([scoreKey, scoreData]) => (
+            <Score
+              key={scoreKey}
+              value={scoreKey}
+              profit={scoreData.profit}
+              setShowBackBetComponent={() => addBackBet(scoreKey)}
+              setShowLayBetComponent={() => addLayBet(scoreKey)}
+            />
+          ))}
+        </div>
+
+        {/* Right Column - Betting Components */}
+        <div className="w-1/3 flex flex-col h-full overflow-y-auto">
+          {activeBackBets.length > 0 && (
+            <Bet
+              betType="Back"
+              activeBets={activeBackBets}
+              updateBetDetails={updateBackBetDetails}
+              onClear={clearBackBets}
+              onRemoveBet={removeBackBet}
+            />
+          )}
+          {activeLayBets.length > 0 && (
+            <Bet
+              betType="Lay"
+              activeBets={activeLayBets}
+              updateBetDetails={updateLayBetDetails}
+              onClear={clearLayBets}
+              onRemoveBet={removeLayBet}
+            />
+          )}
+          {(activeBackBets.length > 0 || activeLayBets.length > 0) && (
+            <button
+              onClick={handlePlaceBet}
+              className="mx-4 my-2 p-2 border rounded shadow-md"
+            >
+              Place Bets
+            </button>
+          )}
+          {(store.placedBackBets[0].length > 0 ||
+            store.placedLayBets[0].length > 0) && (
+            <PlacedBets
+              placedBackBets={store.placedBackBets[0]}
+              placedLayBets={store.placedLayBets[0]}
+              onReset={resetPlacedBets}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
