@@ -60,10 +60,8 @@ export default function Home() {
   };
 
   const resetPlacedBets = () => {
-    const [, setPlacedBack] = store.placedBackBets;
-    const [, setPlacedLay] = store.placedLayBets;
-    setPlacedBack([]);
-    setPlacedLay([]);
+    store.placedBackBets[1]([]);
+    store.placedLayBets[1]([]);
   };
 
   const handlePlaceBet = () => {
